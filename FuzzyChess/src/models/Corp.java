@@ -1,0 +1,94 @@
+package models;
+
+import java.util.ArrayList;
+
+/* Structure that contains members and leader of corp
+ * Leaders: Left Bishop, Right Bishop, King
+ * Left Bishop controls left 3 pawns and knight
+ * Right Bishop controls right 3 pawns and knight
+ * King controls Rooks, Queen, and middle 2 pawns
+ * King can delegate control of its pieces to bishops
+ * so essentially bishops can control all pieces excluding king
+ * When Bishops die the king gains control of all its remaining pieces
+ * However a subturn per turn is lost
+ * When King dies its game over.
+ */
+
+//update getMemberAt
+
+public class Corp {
+	private ArrayList<ChessPiece> members;
+	private ChessPiece leader;
+	private Corp kingsCorp;
+	private boolean isActive;
+	
+	public Corp(Corp kingsCorp) {
+		members = new ArrayList<ChessPiece>();
+		this.kingsCorp = kingsCorp;
+		isActive = true;
+	}
+	
+	public void addMember(ChessPiece member) {
+		if(member.getid() == 'k' || member.getid() == 'K' || member.getid() == 'b' || member.getid() == 'B') {
+			leader = member;
+		}
+		members.add(member);
+	}
+	
+	//update to remove king corp member if captured
+	public void removeMember(ChessPiece member) {
+		members.remove(member);
+		if(member.getid() == leader.getid()) {
+			transferMembers();
+		}		
+	}
+	
+	public void removeAll() {
+		members.removeAll(members);
+		leader = null;
+	}
+	
+	//maybe redo - idk if we'll need a reference to the leader later
+	public ChessPiece getLeader() {
+		return leader;
+	}
+	
+	//redo - currently returns reference to all members
+	public ArrayList<ChessPiece> getMembers() {
+		ArrayList<ChessPiece> totalMembers = new ArrayList<ChessPiece>();
+		totalMembers.addAll(members);
+		//if null then this is the kings corp
+		//otherwise king delegates all members besides himself to bishops
+		if(kingsCorp != null) {
+			totalMembers.addAll(kingsCorp.getMembers());
+			totalMembers.remove(kingsCorp.getLeader());
+		}
+		return totalMembers;			
+	}
+	
+	public ArrayList<BoardPosition> getMemberPositions(){
+		ArrayList<BoardPosition> memberPositions = new ArrayList<BoardPosition>();
+		for(ChessPiece member : getMembers()) {
+			memberPositions.add(member.getPosition());
+		}
+		return memberPositions;
+	}
+
+	public ChessPiece getMemberAt(BoardPosition p) {
+		for(ChessPiece member : getMembers()) {
+			if(member.getPosition().equals(p)) {
+				return member;
+			}
+		}
+		return null;
+	}
+	
+	//in case leader dies
+	private void transferMembers() {
+		for(ChessPiece member : members) {
+			kingsCorp.addMember(member);
+			members.remove(member);
+		}
+		isActive = false;
+	}
+}
