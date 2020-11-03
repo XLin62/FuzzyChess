@@ -166,17 +166,25 @@ public class GameBoard{
 	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();	
+		StringBuilder sb = new StringBuilder();
+		sb.append("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		for(int i = 0; i < boardState.length; i++) {
+			sb.append(i + "\t");
 			for(int j = 0; j < boardState.length; j++) {
 				sb.append(boardState[i][j] + " ");
 			}		
 			sb.append("\t");			
 			for(int k = 0; k < boardColors.length; k++) {
 				sb.append(boardColors[i][k] + " ");
-			}			
+			}
 			sb.append("\n");
-		}	
+		}
+		
+		sb.append("\n \t");
+		for(int i = 0; i < boardState.length; i++) {
+			sb.append(i + " ");
+		}
+		sb.append("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		return sb.toString();
 	}	
 }

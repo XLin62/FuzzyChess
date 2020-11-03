@@ -1,5 +1,6 @@
 package engine;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import ai.SimpleChessAgent;
@@ -33,6 +34,8 @@ public class FuzzyChessConsoleEngine {
 				getPlayer2Move();
 			}
 		}
+		
+		System.out.println("Game Over!");
 	}
 	
 	public void getPlayer1Move() {
@@ -50,7 +53,7 @@ public class FuzzyChessConsoleEngine {
 				break;
 			}
 			else if(input.contentEquals("c")) {
-				FuzzyChessConsoleDisplay.displayCapturedPieces();
+				FuzzyChessConsoleDisplay.displayCapturedPieces(game.getPlayer1Captures().toString(), game.getPlayer2Captures().toString());
 			}
 			else if(input.contentEquals("o")) {
 				FuzzyChessConsoleDisplay.displayOptions();

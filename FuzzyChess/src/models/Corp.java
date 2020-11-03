@@ -37,10 +37,17 @@ public class Corp {
 	
 	//update to remove king corp member if captured
 	public void removeMember(ChessPiece member) {
-		members.remove(member);
-		if(member.getid() == leader.getid()) {
-			transferMembers();
-		}		
+		//if member is a delegated member from king - remove it from kings members
+		if(kingsCorp != null && kingsCorp.getMembers().contains(member)) {
+			kingsCorp.removeMember(member);
+		}
+		else {
+			members.remove(member);
+			//if the member is a bishop - transfer the members it commands to the king
+			if((member.getid() != 'K' && member.getid() != 'k') && member.getid() == leader.getid()) {
+				transferMembers();
+			}		
+		}
 	}
 	
 	public void removeAll() {
@@ -85,10 +92,14 @@ public class Corp {
 	
 	//in case leader dies
 	private void transferMembers() {
-		for(ChessPiece member : members) {
-			kingsCorp.addMember(member);
-			members.remove(member);
+		for(int i = 0; i < members.size(); i++) {
+			kingsCorp.addMember(members.get(i));
+			members.remove(members.get(i));
 		}
 		isActive = false;
+	}
+	
+	public boolean isActive() {
+		return isActive;
 	}
 }

@@ -6,8 +6,16 @@ public class ChessPiece {
 	private BoardPosition position;
 	private char id;
 	private int direction;
+	/*							king	queen	knight	bishop	rook	pawn */
+	private int[][][] rolls = {{{4,5,6},{4,5,6},{4,5,6},{4,5,6},{5,6},{1,2,3,4,5,6}}, 
+							   {{4,5,6},{4,5,6},{4,5,6},{4,5,6},{5,6},{2,3,4,5,6}},
+							   {{6},{6},{4,5,6},{4,5,6},{5,6},{2,3,4,5,6}},
+							   {{5,6},{5,6},{5,6},{4,5,6},{5,6},{3,4,5,6}},
+							   {{4,5,6},{4,5,6},{5,6},{5,6},{6},{5,6}},
+							   {{6},{6},{6},{5,6},{6},{4,5,6}}};
 	public final static int DOWN = 1;
 	public final static int UP = -1;
+	
 	
 	public ChessPiece(BoardPosition pos, char id, int direction) {
 		this.position = pos;
@@ -46,6 +54,32 @@ public class ChessPiece {
 		}
 	}
 	
+	private int convertIDtoArrayPosition() {
+		switch(id) {
+		case 'k':
+		case 'K':
+			return 0;
+		case 'q':
+		case 'Q':
+			return 1;
+		case 'n':
+		case 'N':
+			return 2;
+		case 'b':
+		case 'B':
+			return 3;
+		case 'r':
+		case 'R':
+			return 4;
+		case 'p':
+		case 'P':
+			return 5;
+		default:
+			return 0;	
+		}
+			
+	}
+	
 	public char getid() {
 		return id;
 	}
@@ -57,11 +91,11 @@ public class ChessPiece {
 	public void setPosition(BoardPosition pos) {
 		position = pos;
 	}
-	
-	//todo
-	public ArrayList<Integer> getRolls(ChessPiece Other) {
-		return null;
+
+	public int[] getRolls(ChessPiece other) {
+		return rolls[convertIDtoArrayPosition()][other.convertIDtoArrayPosition()];
 	}
+	
 	
 	//returns possible locations a piece may step to
 	//disregards if there is a piece in that location
@@ -138,7 +172,7 @@ public class ChessPiece {
 	
 	@Override
 	public String toString() {
-		return String.format("%s location (%d, %d)", getName(), position.getX(), position.getY());
+		return getName();
 	}
 	
 }
