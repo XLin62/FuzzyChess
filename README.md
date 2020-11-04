@@ -2,7 +2,7 @@
 Senior Capstone Project for Kennesaw State University
 
 
-TODO: (as of 11/2/20)
+TODO: (as of 11/3/20)
 
 As of now - game logic is mostly complete and is good enough to begin AI and GUI implementation
 
