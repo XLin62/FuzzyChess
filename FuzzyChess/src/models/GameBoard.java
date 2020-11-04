@@ -49,6 +49,7 @@ public class GameBoard{
 	//what available moves and captures are
 	//available to the piece
 	public void updateBoardColors(ArrayList<BoardPosition> activeCorps, ArrayList<BoardPosition> movements, ArrayList<BoardPosition> captures) {
+		resetBoardColors();
 		if(activeCorps != null) {
 			for(BoardPosition p : activeCorps) {
 				boardColors[p.getY()][p.getX()] = 'a';

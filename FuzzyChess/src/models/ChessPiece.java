@@ -84,6 +84,10 @@ public class ChessPiece {
 		return id;
 	}
 	
+	public int getDirection() {
+		return direction;
+	}
+	
 	public BoardPosition getPosition() {
 		return position;
 	}

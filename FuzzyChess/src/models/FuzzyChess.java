@@ -54,13 +54,7 @@ public class FuzzyChess {
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 	}
 
-	public void quitGame() {
-		gameOver = true;
-	}
-
-	public boolean isGameOver() {
-		return gameOver;
-	}
+	
 
 	//corps grab pieces from the board
 	//this is ugly code too - but w/e
@@ -131,7 +125,8 @@ public class FuzzyChess {
 		p2_corps.add(p2_rbishop_corp);
 	}
 	
-	/* as of now - corps go in order */
+	/* as of now - corps go in order
+	 * king - lbishop - rbishop */
 	public Corp getCurrentCorp() {
 		if (turn == 0) {
 			return p1_corps.get(subturn);
@@ -141,13 +136,15 @@ public class FuzzyChess {
 		return null;
 	}
 
-	/*select for movement/capturing - update board colors when selected */
+	/*select for movement/capturing - update board colors when selected
+	* when a piece is selected its possible moves and possible captures
+	* are obtained for later when making a move*/
 	public boolean selectPiece(BoardPosition selectedPosition) {
 		if(board.isInBounds(selectedPosition)) {
 			selectedPiece = getCurrentCorp().getMemberAt(selectedPosition);			
 			if(selectedPiece != null) {
-				possibleMoves = getMoves();
-				possibleCaptures = getCaptures();
+				possibleMoves = getMovementPositions();
+				possibleCaptures = getCapturePositions();
 				board.updateBoardColors(getCurrentCorp().getMemberPositions(), possibleMoves, possibleCaptures);
 				return true;
 			}
@@ -156,19 +153,14 @@ public class FuzzyChess {
 	}
 	
 	
-	/*check all opposing corps member locations and return if
-	 * the selected position contains an enemy piece
-	 */
+	/*gain reference to selectedEnemy and its corp so we can remove it if
+	 * successful roll for capture -- maybe get rid of --*/
 	private boolean selectEnemyPiece(BoardPosition selectedPosition) {
-		ArrayList<Corp> enemyCorps = new ArrayList<Corp>();
-		if(turn == 0)
-			enemyCorps.addAll(p2_corps);
-		else
-			enemyCorps.addAll(p1_corps);
+		ArrayList<Corp> enemyCorps = turn == 0 ? p2_corps : p1_corps;
 		
 		for(Corp enemyCorp : enemyCorps) {
+			//if corp is not active then its remaining pieces are in the kings corp..
 			if(!enemyCorp.isActive()) continue;
-			//save ref to enemyCorp to remove
 			currentEnemyCorp = enemyCorp;
 			selectedEnemy = enemyCorp.getMemberAt(selectedPosition);
 			if(selectedEnemy != null) return true;
@@ -188,11 +180,11 @@ public class FuzzyChess {
 				selectEnemyPiece(newPosition);
 				if(capturePiece()) {
 					movePiece(oldPosition, newPosition);
-					return true;
 				}
+				return true;
 			}
 		}
-		//need to reset board incase move not possible
+		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 		return false;
 	}
 
@@ -240,13 +232,13 @@ public class FuzzyChess {
 			newState.updateBoardState(piece.getPosition(), action);
 			piece.setPosition(action);
 			return new GameNode(newState, piece, parent);
-		}		
+		}
+		
 		return null;
 	}
 
 	//todo - add meaningful comments
-	//also - update to include available captures as well
-	private ArrayList<BoardPosition> getMoves() {
+	private ArrayList<BoardPosition> getMovementPositions() {
 		GameNode root = new GameNode(board.copy(), selectedPiece.copy(), null);
 		Queue<GameNode> frontier = new LinkedList<GameNode>();
 		frontier.add(root);
@@ -269,34 +261,63 @@ public class FuzzyChess {
 		return new ArrayList<BoardPosition>(explored);
 	}
 	
-	private ArrayList<BoardPosition> getCaptures(){
-		ArrayList<BoardPosition> possibleCaptures = new ArrayList<BoardPosition>();
-		ArrayList<Corp> enemyCorps = turn == 0 ? p2_corps : p1_corps;
-		if(selectedPiece.getid() == 'n' || selectedPiece.getid() == 'N') {
+	/* todo/ add meaningful comments
+	 * 
+	 */
+	private ArrayList<BoardPosition> getCapturePositions(){
+		ArrayList<BoardPosition> capturePositions = new ArrayList<BoardPosition>();
+		switch(selectedPiece.getid()) {
+		case 'n':
+		case 'N': //knight attack - melee/charge
 			for(BoardPosition move : possibleMoves) {
-				//more than one space away - set flag
-				if(!selectedPiece.getActions().contains(move)) {
-					diceOffset = true;
-				}
-				
+				ChessPiece current = new ChessPiece(move, selectedPiece.getid(), selectedPiece.getDirection());
+				capturePositions.addAll(getSurroundingEnemyPositions(current, 1));				
 			}
-			//do knight stuff
-			//make sure to make a dice offset if captures are more than 1 space away
-		}
-		else if(selectedPiece.getid() == 'r' || selectedPiece.getid() == 'R') {
-			//do rook stuff
-		}
-		else {
+			break;
+		case 'r':
+		case 'R': //rook attack - ranged radius of 3
+			capturePositions.addAll(getSurroundingEnemyPositions(selectedPiece, 3));
+			break;
+		case 'p':
+		case 'P':
+		case 'b':
+		case 'B': //pawn and bishop attack - melee front and diagonal
 			for(BoardPosition p : selectedPiece.getActions()) {
-				for(Corp enemyCorp : enemyCorps) {
+				for(Corp enemyCorp : turn == 0 ? p2_corps : p1_corps) {
 					if(enemyCorp.getMemberAt(p) != null) {
-						possibleCaptures.add(p);
+						capturePositions.add(p);
+					}
+				}
+			}
+			break;
+		default: //king/queen attack - melee adjacent enemies
+			capturePositions.addAll(getSurroundingEnemyPositions(selectedPiece, 1));
+		}
+		return capturePositions;
+	}
+	
+	//check attack radius of current ChessPiece for possible enemies
+	private ArrayList<BoardPosition> getSurroundingEnemyPositions(ChessPiece current, int radius){
+		ArrayList<BoardPosition> surroundingEnemyPositions = new ArrayList<BoardPosition>();
+		ArrayList<Corp> enemyCorps = turn == 0 ? p2_corps : p1_corps;
+		int min_x = (current.getPosition().getX() - radius) < 0 ? 0 : current.getPosition().getX() - radius;
+		int max_x = (current.getPosition().getX() + radius) > 7 ? 7 : current.getPosition().getX() + radius;
+		int min_y = (current.getPosition().getY() - radius) < 0 ? 0 : current.getPosition().getY() - radius;
+		int max_y = (current.getPosition().getY() + radius) > 7 ? 7 : current.getPosition().getY() + radius;
+		
+		for(int y = min_y; y <= max_y; y++) {
+			for(int x = min_x; x <= max_x; x++) {
+				BoardPosition p = new BoardPosition(x,y);
+				if(!current.getPosition().equals(p)) {
+					for(Corp enemyCorp : enemyCorps) {
+						if(enemyCorp.getMemberAt(p) != null) {
+							surroundingEnemyPositions.add(p);
+						}
 					}
 				}
 			}
 		}
-		
-		return possibleCaptures;
+		return surroundingEnemyPositions;
 	}
 
 	private void movePiece(BoardPosition oldPosition, BoardPosition newPosition) {
@@ -304,11 +325,20 @@ public class FuzzyChess {
 		board.updateBoardState(oldPosition, newPosition);
 	}	
 	
-	//update
+	//update to add roll offset for knight
 	private boolean capturePiece() {
 		int[] neededRolls = selectedPiece.getRolls(selectedEnemy);
 		lastRoll = Math.abs((dice.nextInt() % 6) + 1);
-		System.out.println(lastRoll);	
+		
+		//if its a knight - and the enemy position is not adjacent - subtract 1 from dice roll
+		if(selectedPiece.getid() == 'n' || selectedPiece.getid() == 'N') {
+			if(!selectedPiece.getActions().contains(selectedEnemy.getPosition())){
+				System.out.println("Subtracting 1 from Knight Attack");
+				diceOffset = true;
+				lastRoll -= 1;
+			}
+		}
+		
 		for(int x = 0; x < neededRolls.length; x++) {
 			if(neededRolls[x] == lastRoll) {
 				captureResult = "Won";
@@ -326,11 +356,18 @@ public class FuzzyChess {
 		captureResult = "Lost";
 		return false;
 	}
+	
+	public void quitGame() {
+		gameOver = true;
+	}
+
+	public boolean isGameOver() {
+		return gameOver;
+	}
 
 	public void endTurn() {
 		turn = ++turn % 2;
 		subturn = 0;		
-		board.resetBoardColors();
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 		System.out.println("End Turn");
 	}
@@ -340,7 +377,6 @@ public class FuzzyChess {
 			endTurn();
 		}
 		else{
-			board.resetBoardColors();
 			board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 		}
 		System.out.println("End Subturn");
@@ -368,6 +404,10 @@ public class FuzzyChess {
 
 	public int getSubTurn() {
 		return subturn;
+	}
+	
+	public boolean isDiceOffset() {
+		return diceOffset;
 	}
 	
 	public String getCaptureResult() {

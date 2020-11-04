@@ -9,7 +9,26 @@ public class FuzzyChessConsoleDisplay {
 	}
 	
 	public static void displayRules() {
-		
+		//todo if you want.... kind of annoying tbh
+	}
+	
+	public static void displayAttack(String p1, String p2, int roll, boolean offset, String result, int[] rollsNeeded) {
+		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println(String.format("%s attempts to attack %s", p1, p2));
+		String rolls = "[";
+		for(int i = 0; i < rollsNeeded.length; i++) {
+			rolls += rollsNeeded[i];
+			if(i < rollsNeeded.length -1) {
+				rolls += ", ";
+			}
+		}
+		rolls += "]";
+		System.out.println("Rolls Needed: " + rolls);
+		if(offset) {
+			System.out.println("Knight is offbalance from charge - subtracting 1 from roll");
+		}
+		System.out.println(String.format("Rolled %d\nResult: %s", roll, result));
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 	}
 	
 	public static void displayCapturedPieces(String p1_captures, String p2_captures) {
@@ -20,6 +39,6 @@ public class FuzzyChessConsoleDisplay {
 	}
 	
 	public static void displayOptions() {
-		System.out.println("Options:\ne: endturn\nl: show game log\nq: quit game\nc: show captured peices\nr: rules\nx, y: select tile");
+		System.out.println("Options:\ne: endturn\nq: quit game\nc: show captured peices\nr: rules\nx, y: select tile");
 	}
 }

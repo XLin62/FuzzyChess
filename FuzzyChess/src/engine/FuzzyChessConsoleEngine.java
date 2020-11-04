@@ -71,21 +71,29 @@ public class FuzzyChessConsoleEngine {
 						System.out.println(String.format("Selected %s", game.getSelectedPiece()));
 						FuzzyChessConsoleDisplay.displayTurn(game.getTurn(), game.getSubTurn(), game.getBoard().toString());
 						
-						//Select place to move to
-						System.out.println("Select place to move to.");
+						//Select move location or capture location
+						System.out.println("Select place to move to/or a piece to capture.");
+						System.out.print(">>>");
 						input = inputScanner.nextLine();
 						inputs = input.replace(" ",  "").split(",");
 						x = Integer.parseInt(inputs[0]);
 						y = Integer.parseInt(inputs[1]);
 						selectedPosition = new BoardPosition(x, y);
+						
+						//make the move and update the state of the game
 						if(game.makeMove(selectedPosition)) {
+							//if theres a selected enemy piece then a capture happened
+							//display all the stats
+							if(game.getSelectedEnemyPiece() != null) {
+								FuzzyChessConsoleDisplay.displayAttack(game.getSelectedPiece().toString(), game.getSelectedEnemyPiece().toString(),
+										game.getLastRoll(), game.isDiceOffset(), game.getCaptureResult(), 
+										game.getSelectedPiece().getRolls(game.getSelectedEnemyPiece()));
+							}
 							game.endSubturn();
 						}
 						else {
-							System.out.println("\nInvalid Move\n");
+							System.out.println("\nNo move made\n");
 						}
-						//move or capture
-						
 						break;
 					}
 					else {
@@ -97,14 +105,10 @@ public class FuzzyChessConsoleEngine {
 			}
 			inputScanner.reset();
 		}
-		
-		//wait for user input
-		//check input
-		//update models accordingly
 	}
 	
 	public void getPlayer2Move() {
-		//moves < 3 or turn has ended
+		//
 		game.endTurn();
 	}
 }
