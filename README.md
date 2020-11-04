@@ -7,14 +7,12 @@ TODO: (as of 11/2/20)
 As of now - game logic is mostly complete and is good enough to begin AI and GUI implementation
 
 Game Logic - 
- getMove()/getCapture() methods in FuzzyChess 
-  -I want to mesh these into one method
-  -Right now basic capture logic is sound but rook and knight capture logic needs to be implemented
-  -I(Marcus) will do this sometime before wednesday
+ All logic is now sound - only updates to models package now is just some really minor tweaks to updating
+ the board colors - other than that everything is in place completely to start GUI/AI
   
 GUI -
  Everything that you need to create the GUI should be found in the FuzzyChess class - make it similar
- to how our other implementation was.
+ to how our other implementation was
  -Needed-
   Gameboard display
   Captured peices display
