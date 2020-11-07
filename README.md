@@ -17,6 +17,7 @@ GUI -
   Dice Roll/Combat Display - Minor tweaks needed - I want to have the roll animation finish before peices move
   Menu - as of now the menu doesnt work at all - need functionality
   End Turn Button - easy implementation - to do soon
+  Tool tips to show rolls needed to capture could be a nice little add on 
   
   
 AI - 
