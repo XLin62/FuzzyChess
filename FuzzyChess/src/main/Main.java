@@ -6,7 +6,11 @@ import engine.FuzzyChessConsoleEngine;
 public class Main {
 
 	public static void main(String[] args) {
-		FuzzyChessConsoleEngine engine = new FuzzyChessConsoleEngine();
+		//uncomment if you want console display
+		/*FuzzyChessConsoleEngine engine = new FuzzyChessConsoleEngine();
+		engine.run();*/
+		
+		FuzzyChessEngine engine = new FuzzyChessEngine();
 		engine.run();
 	}
 

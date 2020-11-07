@@ -4,6 +4,7 @@ public class BoardPosition {
 	private int x;
 	private int y;
 	public final static int TILE_SIZE = 80;
+	public final static int OFFSET = 60;
 	
 	public BoardPosition(int x, int y) {
 		this.x = x;
@@ -11,7 +12,9 @@ public class BoardPosition {
 	}
 	
 	public static BoardPosition convert(int screenX, int screenY) {
-		return new BoardPosition(screenX/TILE_SIZE, screenY/TILE_SIZE);
+		int resX = Math.floorDiv(screenX-OFFSET, TILE_SIZE);
+		int resY = Math.floorDiv(screenY-OFFSET, TILE_SIZE);
+		return new BoardPosition(resX, resY);
 	}
 	
 	public int getX() {

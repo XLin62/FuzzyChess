@@ -1,5 +1,8 @@
 package models;
 
+
+//NEED TO LOSE REFERENCE TO SELECTED PEICE AND ENEMY PEICE - GUI BREAKS
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -170,22 +173,32 @@ public class FuzzyChess {
 	
 	public boolean makeMove(BoardPosition newPosition) {
 		// check to make sure there is a selected piece
+		boolean moveMade = false;
 		if(selectedPiece != null) {
 			BoardPosition oldPosition = new BoardPosition(selectedPiece.getPosition().getX(), selectedPiece.getPosition().getY());
 			if(possibleMoves.contains(newPosition)) {
 				movePiece(oldPosition, newPosition);
-				return true;
+				moveMade = true;
 			}
 			if(possibleCaptures.contains(newPosition)) {
 				selectEnemyPiece(newPosition);
 				if(capturePiece()) {
 					movePiece(oldPosition, newPosition);
 				}
-				return true;
+				moveMade = true;
 			}
 		}
+		/*selectedPiece = null;
+		selectedEnemy = null;*/
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
-		return false;
+		return moveMade;
+	}
+	
+	//resets the selected pieces in the game
+	//call if makeMove returns false
+	public void resetSelectedPieces() {
+		selectedPiece = null;
+		selectedEnemy = null;
 	}
 
 	//for pathfinding use
@@ -369,17 +382,15 @@ public class FuzzyChess {
 		turn = ++turn % 2;
 		subturn = 0;		
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
-		System.out.println("End Turn");
+		System.out.println("--End Turn");
 	}
 
 	public void endSubturn() {
-		if(++subturn == 3) {
-			endTurn();
-		}
-		else{
-			board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
-		}
 		System.out.println("End Subturn");
+		if(++subturn == 3)
+			endTurn();
+		else 
+			board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 	}
 	
 	public ChessPiece getSelectedPiece() {
