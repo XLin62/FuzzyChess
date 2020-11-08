@@ -63,8 +63,12 @@ public class FuzzyChessDisplay {
 		return statusPanel;
 	}
 	
-	public CapturePanel getCapturePanel(int turn) {
-		return turn == 0 ? capturePanel1 : capturePanel2;
+	public CapturePanel getCapturePanel1() {
+		return capturePanel1;
+	}
+	
+	public CapturePanel getCapturePanel2() {
+		return capturePanel2;
 	}
 	
 	public GamePanel getGamePanel() {

@@ -1,12 +1,14 @@
 package engine;
 
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.awt.Robot;
 
 import javax.swing.SwingUtilities;
 
 import gui.FuzzyChessDisplay;
 import models.BoardPosition;
+import models.ChessPiece;
 import models.FuzzyChess;
 
 public class FuzzyChessEngine{
@@ -99,7 +101,8 @@ public class FuzzyChessEngine{
 		//board
 		display.getGamePanel().updateBoard(game.getBoard().getBoardState(), game.getBoard().getBoardColors());
 		//captures
-		
+		display.getCapturePanel1().update(game.getPlayer1Captures());
+		display.getCapturePanel2().update(game.getPlayer2Captures());
 		//attack
 		char attackerID = game.getSelectedPiece() == null ? 'x' : game.getSelectedPiece().getid();
 		char defenderID = game.getSelectedEnemyPiece() == null ? 'x' : game.getSelectedEnemyPiece().getid();

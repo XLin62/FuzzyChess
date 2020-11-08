@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 public class AttackPanel extends JPanel implements Runnable{
@@ -78,6 +80,7 @@ public class AttackPanel extends JPanel implements Runnable{
 	public void setTheme(GameResources t) {
 		resources = t;
 		setBackground(resources.getBackgroundColor());
+		setBorder(BorderFactory.createLineBorder(resources.getBoardBorderColor()));
 		attackerPanel.repaint();
 		defenderPanel.repaint();
 		dicePanel.repaint();
@@ -94,16 +97,4 @@ public class AttackPanel extends JPanel implements Runnable{
 			} catch(InterruptedException e) {}
 		}
 	}
-	
-	
-	
-	/*private void updateFont() {
-		
-	}
-	
-	private void updateColors() {
-		attackerPanel.setBackground(theme.getBackgroundColor());
-		dicePanel.setBackground(theme.getBackgroundColor());
-		defenderPanel.setBackground(theme.getBackgroundColor());
-	}*/
 }

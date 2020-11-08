@@ -348,7 +348,8 @@ public class FuzzyChess {
 			if(!selectedPiece.getActions().contains(selectedEnemy.getPosition())){
 				System.out.println("Subtracting 1 from Knight Attack");
 				diceOffset = true;
-				lastRoll -= 1;
+				if(lastRoll != 1) //cant get less than 1
+					lastRoll -= 1;
 			}
 		}
 		

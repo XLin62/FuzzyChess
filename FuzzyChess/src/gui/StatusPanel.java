@@ -50,6 +50,7 @@ public class StatusPanel extends JPanel {
 		endTurnButton.setForeground(theme.getForegroundColor());
 		turnLabel.setForeground(theme.getForegroundColor());
 		moveLabel.setForeground(theme.getForegroundColor());
+		setBorder(BorderFactory.createLineBorder(theme.getBoardBorderColor()));
 	}
 	
 	public void setTurnText(int turn) {
