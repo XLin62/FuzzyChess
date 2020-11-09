@@ -87,7 +87,7 @@ public class AiController extends TeamController{
 	//Positive score that tries and get the pieces to move forward
 	private double getMoveScore(Node move){
 		if(Math.random() < .6 || move.parent == null) return 0;
-		return move.position.distance(move.parent.position) * (1/move.current_piece.getImportance());
+		return Math.random() * move.position.distance(move.parent.position) * (1/move.current_piece.getImportance());
 	}
 
 	private double getAttackedScore(Node move){
@@ -95,7 +95,7 @@ public class AiController extends TeamController{
 		for(Corp corps : game.peekNextPlayer().getCorps()){
 			for(ChessPiece enemy : corps.getMembers()){
 				if(move.game_state.getCapturePositions(enemy,this.getCorps()).contains(move.position)){
-					return -2 * move.current_piece.getImportance();
+					return Math.random() * (-2 * move.current_piece.getImportance());
 				}
 			}
 		}
@@ -117,11 +117,11 @@ public class AiController extends TeamController{
 			}
 		}
 
-		return friendly_deaths.size();
+		return (Math.random() * friendly_deaths.size());
 	}
 	private double getAttackScore(ChessPiece item,ChessPiece enemy){
-		if(Math.random() < .2) return 0;
-		return item.getRolls(enemy).length / 6;
+		if(Math.random() < .5) return 0;
+		return Math.random() * (item.getRolls(enemy).length / 6);
 	}
 
 
