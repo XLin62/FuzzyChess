@@ -8,6 +8,7 @@ import javax.swing.*;
 
 
 public class GamePanel extends JPanel {
+	private static final long serialVersionUID = -3107018262033523533L;
 	private final int WIDTH = 760;
 	private final int HEIGHT = 760;
 	private final int OFFSET = 60;
@@ -15,7 +16,6 @@ public class GamePanel extends JPanel {
 	
 	private char[][] boardState;
 	private char[][] boardColors;
-	private boolean isGameOver;
 	
 	private GameResources resources;
 	

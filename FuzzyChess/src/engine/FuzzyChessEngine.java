@@ -11,6 +11,7 @@ import models.FuzzyChess;
 public class FuzzyChessEngine implements ActionListener{
 	private FuzzyChess game;
 	private FuzzyChessDisplay display;
+	private boolean inAnimation;
 	
 	public FuzzyChessEngine() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -19,6 +20,7 @@ public class FuzzyChessEngine implements ActionListener{
 				display = new FuzzyChessDisplay();
 				updateDisplay();
 				registerControls();
+				inAnimation = false;
 			}
 		});
 	}
@@ -33,7 +35,10 @@ public class FuzzyChessEngine implements ActionListener{
 			moveMade = game.makeMove(move);
 			//did we select an enemy? - if so - show animation
 			if(game.getSelectedEnemyPiece() != null) {
-				
+				display.getAttackPanel().update(game.getSelectedPiece().getid(), game.getSelectedEnemyPiece().getid(), game.getCaptureResult());
+				display.getAttackPanel().rollDice(game.getLastRoll());
+				inAnimation = true;
+				return;
 			}
 			if(moveMade) {
 				game.endSubturn();
@@ -48,13 +53,8 @@ public class FuzzyChessEngine implements ActionListener{
 			}
 			return;
 		}
-			
-		//check to see if turn has switched
-		//switch to ai control if so
-		/*if(game.getTurn() == 1) {
-			getPlayer2Move();
-		}*/
 		updateDisplay();
+		//game.resetSelectedPieces();
 	}
 	
 	public void getPlayer2Move(BoardPosition move) {
@@ -67,37 +67,42 @@ public class FuzzyChessEngine implements ActionListener{
 			moveMade = game.makeMove(move);
 			//did we select an enemy? - if so - show animation
 			if(game.getSelectedEnemyPiece() != null) {
-				
+				display.getAttackPanel().update(game.getSelectedPiece().getid(), game.getSelectedEnemyPiece().getid(), game.getCaptureResult());
+				display.getAttackPanel().rollDice(game.getLastRoll());
+				inAnimation = true;
+				return;
 			}
 			if(moveMade) {
 				game.endSubturn();
 			}
+			updateDisplay();
+			game.resetSelectedPieces();
 			
 			//show win screen
 			if(game.isGameOver()) {
-				System.out.println("Game Over");	
+				System.out.println("Game Over");
+				display.displayWinScreen();
 			}
-			
-			updateDisplay();
-			game.resetSelectedPieces();
 			return;
-		}
-			
-		//check to see if turn has switched
-		//switch to ai control if so
-		/*if(game.getTurn() == 1) {
-			getPlayer2Move();
-		}*/
-		
-		//show win screen
-		if(game.isGameOver()) {
-			System.out.println("Game Over");
 		}
 		updateDisplay();
 	}
 	
-	public void updateDisplay() {
+	//called by dice roll animation thread when finished
+	public void callbackUpdate() {
+		inAnimation = false;
+		game.endSubturn();
+		updateDisplay();
+		game.resetSelectedPieces();
 		
+		//show win screen
+		if(game.isGameOver()) {
+			System.out.println("Game Over");
+			display.displayWinScreen();
+		}
+	}
+	
+	public void updateDisplay() {
 		//status
 		display.getStatusPanel().setTurnText(game.getTurn());
 		display.getStatusPanel().setMoveText(game.getSubTurn());
@@ -111,9 +116,6 @@ public class FuzzyChessEngine implements ActionListener{
 		char attackerID = game.getSelectedPiece() == null ? 'x' : game.getSelectedPiece().getid();
 		char defenderID = game.getSelectedEnemyPiece() == null ? 'x' : game.getSelectedEnemyPiece().getid();
 		display.getAttackPanel().update(attackerID, defenderID, game.getCaptureResult());
-		if(game.getSelectedEnemyPiece() != null) {
-			display.getAttackPanel().rollDice(game.getLastRoll());
-		}
 		//menu
 		display.getDevModeMenuItem().setSelected(game.isDevMode());
 		//endgame
@@ -123,6 +125,7 @@ public class FuzzyChessEngine implements ActionListener{
 	}
 	
 	public void registerControls() {
+		display.getAttackPanel().setCallBackRef(this);
 		display.getGamePanel().addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				dealWithClick(e);
@@ -140,12 +143,13 @@ public class FuzzyChessEngine implements ActionListener{
 	}
 	
 	public void dealWithClick(MouseEvent e) {
-		//System.out.println(String.format("Actual: %d, %d\nBoardPosition: %s", e.getX(), e.getY(), BoardPosition.convert(e.getX(), e.getY()).toString()));
-		if(game.getTurn() == 0) {
-			getPlayer1Move(BoardPosition.convert(e.getX(), e.getY()));
-		}
-		else if(game.getTurn() == 1) {
-			getPlayer2Move(BoardPosition.convert(e.getX(), e.getY()));
+		if(!inAnimation) { //if we're in an animation lock controls
+			if(game.getTurn() == 0) {
+				getPlayer1Move(BoardPosition.convert(e.getX(), e.getY()));
+			}
+			else if(game.getTurn() == 1) {
+				getPlayer2Move(BoardPosition.convert(e.getX(), e.getY()));
+			}
 		}
 	}
 	
@@ -167,9 +171,11 @@ public class FuzzyChessEngine implements ActionListener{
 			game.toggleDevMode(); //need to make this a checkbox
 		}
 		else if(e.getSource() == display.getStatusPanel().getEndTurnButton()) {
-			game.endTurn();
-			game.resetSelectedPieces();
-			updateDisplay();
+			if(!inAnimation) {
+				game.endTurn();
+				game.resetSelectedPieces();
+				updateDisplay();
+			}
 		}
 		
 	}	

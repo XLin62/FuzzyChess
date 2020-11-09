@@ -1,11 +1,8 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -14,6 +11,7 @@ import javax.swing.*;
 import models.ChessPiece;
 
 public class CapturePanel extends JPanel {
+	private static final long serialVersionUID = 2110193943756242580L;
 	private GameResources resources;
 	private JLabel titleLabel;
 	private ImageGrid grid;
@@ -31,6 +29,7 @@ public class CapturePanel extends JPanel {
 	}
 	
 	private class ImageGrid extends JPanel{
+		private static final long serialVersionUID = -1520709109005506504L;
 		private int gridOffset = 20;
 		private int spaceSize = 80;
 		private int spaceOffset = 5;

@@ -10,6 +10,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import engine.FuzzyChessEngine;
+
 public class AttackPanel extends JPanel implements Runnable{
 	private static final long serialVersionUID = 1030010850185263656L;
 	private GameResources resources;
@@ -20,6 +22,8 @@ public class AttackPanel extends JPanel implements Runnable{
 	private JLabel defenderLabel;
 	public Thread diceRoller;
 	private int lastRoll;
+	//callback to engine to update game after dice roll animation
+	private FuzzyChessEngine callback;
 	
 	public AttackPanel() {
 		setLayout(new FlowLayout());
@@ -37,6 +41,7 @@ public class AttackPanel extends JPanel implements Runnable{
 	}
 	
 	private class ImagePanel extends JPanel{
+		private static final long serialVersionUID = 3005984523390317987L;
 		private int WIDTH = 100;
 		private int HEIGHT = 100;
 		private int OFFSET = 10;
@@ -107,5 +112,10 @@ public class AttackPanel extends JPanel implements Runnable{
 			} catch(InterruptedException e) {}
 		}
 		diceRoller = null;
+		callback.callbackUpdate();
+	}
+	
+	public void setCallBackRef(FuzzyChessEngine engine) {
+		callback = engine;
 	}
 }
