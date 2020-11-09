@@ -1,6 +1,6 @@
 package models;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class GameBoard{
 	/*positions of all pieces in game - lowercase is black, uppercase is white
@@ -152,6 +152,137 @@ public class GameBoard{
 			}
 		}
 		return true;
+	}
+
+
+
+
+
+	private class GameNode{
+		public GameBoard state;
+		public GameNode parent;
+		public ChessPiece currentPiece;
+		public int depth;
+
+		public GameNode(GameBoard state, ChessPiece currentPiece, GameNode parent) {
+			this.state = state;
+			this.currentPiece = currentPiece;
+			this.parent = parent;
+			depth = parent == null ? 0 : parent.depth + 1;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = state.hashCode();
+			result = 31 * result + currentPiece.hashCode();
+			result = 31 * result + Integer.hashCode(depth);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof GameNode))
+				return false;
+			GameNode other = (GameNode)o;
+			return (state.equals(other.state) && currentPiece.equals(other.currentPiece));
+		}
+	}
+
+	//creates a new gamenode for pathfinding algorithm
+	private GameNode getNode(GameNode parent, BoardPosition action,ChessPiece selectedPiece) {
+		if(parent == null || action == null) {
+			return new GameNode(this.copy(), selectedPiece.copy(), null);
+		}
+
+		GameBoard newState = parent.state.copy();
+		ChessPiece piece = parent.currentPiece.copy();
+
+		if(newState.isInBounds(action) && !newState.isOccupied(action)){
+			newState.updateBoardState(piece.getPosition(), action);
+			piece.setPosition(action);
+			return new GameNode(newState, piece, parent);
+		}
+
+		return null;
+	}
+
+	//todo - add meaningful comments
+	public ArrayList<BoardPosition> getMovementPositions(ChessPiece selectedPiece) {
+		GameNode root = new GameNode(this.copy(), selectedPiece.copy(), null);
+		Queue<GameNode> frontier = new LinkedList<GameNode>();
+		frontier.add(root);
+		HashSet<BoardPosition> explored = new HashSet<BoardPosition>();
+		int maxDepth = root.currentPiece.getMoveCount();
+
+		while(!frontier.isEmpty()) {
+			GameNode curNode = frontier.remove();
+			if(curNode.depth > maxDepth) break;
+			if(!curNode.state.equals(root.state)) //dont want to count start position
+				explored.add(curNode.currentPiece.getPosition());
+			for(int i = 0; i < curNode.currentPiece.getActions().size(); i++) {
+				BoardPosition curAction = curNode.currentPiece.getActions().get(i);
+				GameNode child = getNode(curNode, curAction,curNode.currentPiece);
+				if((child != null) && !(frontier.contains(child)) && !(explored.contains(curAction))) {
+					frontier.add(child);
+				}
+			}
+		}
+		return new ArrayList<BoardPosition>(explored);
+	}
+
+	public ArrayList<BoardPosition> getCapturePositions(ChessPiece selectedPiece,List<Corp> enemyCorps){
+		ArrayList<BoardPosition> capturePositions = new ArrayList<BoardPosition>();
+		switch(selectedPiece.getid()) {
+			case 'n':
+			case 'N': //knight attack - melee/charge
+				for(BoardPosition move : this.getMovementPositions(selectedPiece)) {
+					ChessPiece current = new ChessPiece(move, selectedPiece.getid(), selectedPiece.getDirection());
+					capturePositions.addAll(getSurroundingEnemyPositions(current, 1,enemyCorps));
+				}
+				break;
+			case 'r':
+			case 'R': //rook attack - ranged radius of 3
+				capturePositions.addAll(getSurroundingEnemyPositions(selectedPiece, 3,enemyCorps));
+				break;
+			case 'p':
+			case 'P':
+			case 'b':
+			case 'B': //pawn and bishop attack - melee front and diagonal
+				for(BoardPosition p : selectedPiece.getActions()) {
+					for(Corp enemyCorp : enemyCorps) {
+						if(enemyCorp.getMemberAt(p) != null) {
+							capturePositions.add(p);
+						}
+					}
+				}
+				break;
+			default: //king/queen attack - melee adjacent enemies
+				capturePositions.addAll(getSurroundingEnemyPositions(selectedPiece, 1,enemyCorps));
+		}
+		return capturePositions;
+	}
+
+	//check attack radius of current ChessPiece for possible enemies
+	public ArrayList<BoardPosition> getSurroundingEnemyPositions(ChessPiece current, int radius, List<Corp> enemyCorps){
+		ArrayList<BoardPosition> surroundingEnemyPositions = new ArrayList<BoardPosition>();
+		int min_x = (current.getPosition().getX() - radius) < 0 ? 0 : current.getPosition().getX() - radius;
+		int max_x = (current.getPosition().getX() + radius) > 7 ? 7 : current.getPosition().getX() + radius;
+		int min_y = (current.getPosition().getY() - radius) < 0 ? 0 : current.getPosition().getY() - radius;
+		int max_y = (current.getPosition().getY() + radius) > 7 ? 7 : current.getPosition().getY() + radius;
+
+		for(int y = min_y; y <= max_y; y++) {
+			for(int x = min_x; x <= max_x; x++) {
+				BoardPosition p = new BoardPosition(x,y);
+				if(!current.getPosition().equals(p)) {
+					for(Corp enemyCorp : enemyCorps) {
+						if(enemyCorp.getMemberAt(p) != null) {
+							surroundingEnemyPositions.add(p);
+						}
+					}
+				}
+			}
+		}
+		return surroundingEnemyPositions;
 	}
 	
 	@Override

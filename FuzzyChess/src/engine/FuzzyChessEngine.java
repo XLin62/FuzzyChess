@@ -4,6 +4,9 @@ import java.awt.event.*;
 
 import javax.swing.SwingUtilities;
 
+import ai.AiController;
+import ai.PlayerController;
+import ai.TeamController;
 import gui.FuzzyChessDisplay;
 import models.BoardPosition;
 import models.FuzzyChess;
@@ -12,80 +15,19 @@ public class FuzzyChessEngine implements ActionListener{
 	private FuzzyChess game;
 	private FuzzyChessDisplay display;
 	private boolean inAnimation;
+	TeamController player = new PlayerController();
+	TeamController ai = new AiController();
 	
 	public FuzzyChessEngine() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				game = new FuzzyChess();
+				game = new FuzzyChess(player,ai);
 				display = new FuzzyChessDisplay();
 				updateDisplay();
 				registerControls();
 				inAnimation = false;
 			}
 		});
-	}
-	
-	public void getPlayer1Move(BoardPosition move) {
-		boolean moveMade = false;
-		
-		if(game.getSelectedPiece() == null) {
-			game.selectPiece(move);
-		}
-		else{
-			moveMade = game.makeMove(move);
-			//did we select an enemy? - if so - show animation
-			if(game.getSelectedEnemyPiece() != null) {
-				display.getAttackPanel().update(game.getSelectedPiece().getid(), game.getSelectedEnemyPiece().getid(), game.getCaptureResult());
-				display.getAttackPanel().rollDice(game.getLastRoll());
-				inAnimation = true;
-				return;
-			}
-			if(moveMade) {
-				game.endSubturn();
-			}
-			updateDisplay();
-			game.resetSelectedPieces();
-			
-			//show win screen
-			if(game.isGameOver()) {
-				System.out.println("Game Over");
-				display.displayWinScreen();
-			}
-			return;
-		}
-		updateDisplay();
-		//game.resetSelectedPieces();
-	}
-	
-	public void getPlayer2Move(BoardPosition move) {
-		boolean moveMade = false;
-		
-		if(game.getSelectedPiece() == null) {
-			game.selectPiece(move);
-		}
-		else{
-			moveMade = game.makeMove(move);
-			//did we select an enemy? - if so - show animation
-			if(game.getSelectedEnemyPiece() != null) {
-				display.getAttackPanel().update(game.getSelectedPiece().getid(), game.getSelectedEnemyPiece().getid(), game.getCaptureResult());
-				display.getAttackPanel().rollDice(game.getLastRoll());
-				inAnimation = true;
-				return;
-			}
-			if(moveMade) {
-				game.endSubturn();
-			}
-			updateDisplay();
-			game.resetSelectedPieces();
-			
-			//show win screen
-			if(game.isGameOver()) {
-				System.out.println("Game Over");
-				display.displayWinScreen();
-			}
-			return;
-		}
-		updateDisplay();
 	}
 	
 	//called by dice roll animation thread when finished
@@ -110,8 +52,8 @@ public class FuzzyChessEngine implements ActionListener{
 		//board
 		display.getGamePanel().updateBoard(game.getBoard().getBoardState(), game.getBoard().getBoardColors());
 		//captures
-		display.getCapturePanel1().update(game.getPlayer1Captures());
-		display.getCapturePanel2().update(game.getPlayer2Captures());
+		display.getCapturePanel1().update(game.getPlayers()[0].getCaptures());
+		display.getCapturePanel2().update(game.getPlayers()[1].getCaptures());
 		//attack
 		char attackerID = game.getSelectedPiece() == null ? 'x' : game.getSelectedPiece().getid();
 		char defenderID = game.getSelectedEnemyPiece() == null ? 'x' : game.getSelectedEnemyPiece().getid();
@@ -144,12 +86,7 @@ public class FuzzyChessEngine implements ActionListener{
 	
 	public void dealWithClick(MouseEvent e) {
 		if(!inAnimation) { //if we're in an animation lock controls
-			if(game.getTurn() == 0) {
-				getPlayer1Move(BoardPosition.convert(e.getX(), e.getY()));
-			}
-			else if(game.getTurn() == 1) {
-				getPlayer2Move(BoardPosition.convert(e.getX(), e.getY()));
-			}
+			game.getCurrentPlayer().makeMove(this,BoardPosition.convert(e.getX(), e.getY()));
 		}
 	}
 	
@@ -160,7 +97,7 @@ public class FuzzyChessEngine implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == display.getNewGameMenuItem()) {
-			game = new FuzzyChess();
+			game = new FuzzyChess(player,ai);
 			display.reset();
 			updateDisplay();
 		}
@@ -177,6 +114,20 @@ public class FuzzyChessEngine implements ActionListener{
 				updateDisplay();
 			}
 		}
-		
-	}	
+	}
+
+	public void setInAnimation(boolean inAnimation) {
+		this.inAnimation = inAnimation;
+	}
+	public boolean isInAnimation(){
+		return inAnimation;
+	}
+
+	public FuzzyChess getGame(){
+		return game;
+	}
+
+	public FuzzyChessDisplay getDisplay(){
+		return display;
+	}
 }

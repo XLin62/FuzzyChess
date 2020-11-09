@@ -22,6 +22,26 @@ public class ChessPiece {
 		this.id = id;
 		this.direction = direction;
 	}
+	public double getImportance(){
+		switch(id){
+			case 'r':
+			case 'B':
+			case 'R':
+			case 'b':
+				return 1.5;
+			case 'n':
+			case 'N':
+				return 1.3;
+			case 'q':
+			case 'Q':
+				return 2;
+			case 'k':
+			case 'K':
+				return 3;
+			default:
+				return 1;
+		}
+	}
 	
 	private String getName() {
 		switch(id) {

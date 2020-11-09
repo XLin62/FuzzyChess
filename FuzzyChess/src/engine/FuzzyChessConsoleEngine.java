@@ -1,9 +1,10 @@
 package engine;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
-import ai.SimpleChessAgent;
+import ai.AiController;
+import ai.PlayerController;
+import ai.TeamController;
 import gui.FuzzyChessConsoleDisplay;
 import models.BoardPosition;
 import models.FuzzyChess;
@@ -12,11 +13,12 @@ import models.FuzzyChess;
 public class FuzzyChessConsoleEngine {
 	private Scanner inputScanner;
 	private FuzzyChess game;
-	private SimpleChessAgent ai;
+	private TeamController ai = new AiController();
+	private TeamController player = new PlayerController();
 	
 	public FuzzyChessConsoleEngine() {
 		inputScanner = new Scanner(System.in);
-		game = new FuzzyChess();
+		game = new FuzzyChess(player,ai);
 	}
 	
 	public void run() {
@@ -53,7 +55,7 @@ public class FuzzyChessConsoleEngine {
 				break;
 			}
 			else if(input.contentEquals("c")) {
-				FuzzyChessConsoleDisplay.displayCapturedPieces(game.getPlayer1Captures().toString(), game.getPlayer2Captures().toString());
+				FuzzyChessConsoleDisplay.displayCapturedPieces(game.getPlayers()[0].getCaptures().toString(), game.getPlayers()[1].getCaptures().toString());
 			}
 			else if(input.contentEquals("o")) {
 				FuzzyChessConsoleDisplay.displayOptions();
