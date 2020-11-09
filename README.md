@@ -2,7 +2,7 @@
 Senior Capstone Project for Kennesaw State University
 
 
-TODO: (as of 11/7/20)
+TODO: (as of 11/9/20)
 
 As of now - GUI is mostly complete and AI is needed to be worked on
 
