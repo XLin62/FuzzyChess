@@ -5,7 +5,7 @@ import javax.swing.*;
 import fireworks.FireworksPanel;
 
 public class FuzzyChessDisplay {
-	private GameResources theme;
+	private GameResources resources;
 	private JFrame display;
 	private StatusPanel statusPanel;
 	private CapturePanel capturePanel1;
@@ -13,13 +13,12 @@ public class FuzzyChessDisplay {
 	private GamePanel gamePanel;
 	private AttackPanel attackPanel;
 	private FireworksPanel winScreen;
-	
+	private RulesPanel helpScreen;
 	
 	private JMenuItem newGameMenuItem;
 	private JMenuItem howToPlayMenuItem;
 	private JCheckBoxMenuItem devModeMenuItem;
 	private JMenuItem defaultStyleMenuItem;
-	private JMenuItem style2MenuItem;
 
 	
 	public FuzzyChessDisplay() {
@@ -56,8 +55,7 @@ public class FuzzyChessDisplay {
 		howToPlayMenuItem = new JMenuItem("How to Play");
 		devModeMenuItem = new JCheckBoxMenuItem("Developer Mode"); //will enable user to ignore game rules to test game functions - like win state/etc
 		defaultStyleMenuItem = new JMenuItem("Default");
-		
-		
+				
 		game.add(newGameMenuItem);
 		game.add(howToPlayMenuItem);
 		game.add(styles);
@@ -67,11 +65,23 @@ public class FuzzyChessDisplay {
 		display.setJMenuBar(menubar);
 	}
 	
+	public void displayHelpScreen() {
+		if(gamePanel != null) {
+			display.getContentPane().remove(gamePanel);
+			helpScreen = new RulesPanel();
+			helpScreen.setResources(resources);
+			display.add(helpScreen, BorderLayout.CENTER);
+			display.validate();
+			statusPanel.getEndTurnButton().setEnabled(false);
+		}
+	}
+	
 	public void displayWinScreen() {
 		if(gamePanel != null) {
 			display.getContentPane().remove(gamePanel);
 			winScreen = new FireworksPanel();
 			display.add(winScreen, BorderLayout.CENTER);
+			display.validate();
 			statusPanel.getEndTurnButton().setEnabled(false);
 		}
 	}
@@ -79,10 +89,14 @@ public class FuzzyChessDisplay {
 	public void reset() {
 		if(winScreen != null) {
 			display.getContentPane().remove(winScreen);
-			display.getContentPane().add(gamePanel);
-			statusPanel.getEndTurnButton().setEnabled(true);
 			winScreen = null;
 		}
+		if(helpScreen != null) {
+			display.getContentPane().remove(helpScreen);
+			helpScreen = null;
+		}
+		display.getContentPane().add(gamePanel);
+		statusPanel.getEndTurnButton().setEnabled(true);
 	}
 	
 	public StatusPanel getStatusPanel() {
@@ -121,13 +135,13 @@ public class FuzzyChessDisplay {
 	public void setTheme(String type) {
 		switch(type) {
 		case "Default":
-			theme = GameResources.getDefault();
+			resources = GameResources.getDefault();
 		}//can add more
 		
-		statusPanel.setTheme(theme);
-		capturePanel1.setTheme(theme);
-		capturePanel2.setTheme(theme);
-		gamePanel.setTheme(theme);
-		attackPanel.setTheme(theme);
+		statusPanel.setTheme(resources);
+		capturePanel1.setTheme(resources);
+		capturePanel2.setTheme(resources);
+		gamePanel.setTheme(resources);
+		attackPanel.setTheme(resources);
 	}
 }

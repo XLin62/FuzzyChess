@@ -45,12 +45,6 @@ public class FuzzyChessEngine implements ActionListener{
 			}
 			updateDisplay();
 			game.resetSelectedPieces();
-			
-			//show win screen
-			if(game.isGameOver()) {
-				System.out.println("Game Over");
-				display.displayWinScreen();
-			}
 			return;
 		}
 		updateDisplay();
@@ -77,12 +71,6 @@ public class FuzzyChessEngine implements ActionListener{
 			}
 			updateDisplay();
 			game.resetSelectedPieces();
-			
-			//show win screen
-			if(game.isGameOver()) {
-				System.out.println("Game Over");
-				display.displayWinScreen();
-			}
 			return;
 		}
 		updateDisplay();
@@ -130,10 +118,6 @@ public class FuzzyChessEngine implements ActionListener{
 			public void mousePressed(MouseEvent e) {
 				dealWithClick(e);
 			}
-			
-			public void mouseMoved(MouseEvent e) {
-				dealWithMouseMovement(e);
-			}
 		});
 		
 		display.getNewGameMenuItem().addActionListener(this);
@@ -152,10 +136,6 @@ public class FuzzyChessEngine implements ActionListener{
 			}
 		}
 	}
-	
-	public void dealWithMouseMovement(MouseEvent e) {
-		display.getGamePanel().setToolTipText(BoardPosition.convert(e.getX(), e.getY()).toString());
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -165,7 +145,7 @@ public class FuzzyChessEngine implements ActionListener{
 			updateDisplay();
 		}
 		else if(e.getSource() == display.getHowToPlayMenuItem()) {
-			//display pdf somehow - or create own rule page
+			display.displayHelpScreen();
 		}
 		else if(e.getSource() == display.getDevModeMenuItem()) {
 			game.toggleDevMode(); //need to make this a checkbox

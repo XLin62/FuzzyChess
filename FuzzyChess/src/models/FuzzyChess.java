@@ -132,12 +132,24 @@ public class FuzzyChess {
 	}
 	
 	/* as of now - corps go in order
+	 * logic bug - supposed to lose turn if corp leader is captured
 	 * king - lbishop - rbishop */
 	public Corp getCurrentCorp() {
+		int corpID = subturn;
 		if (turn == 0) {
-			return p1_corps.get(subturn);
+			for(int i = 0; i < p1_corps.size(); i++) {
+				if(!p1_corps.get(i).isActive()) {
+					corpID++;
+				}
+			}
+			return p1_corps.get(corpID);
 		} else if (turn == 1) {
-			return p2_corps.get(subturn);
+			for(int i = 0; i < p2_corps.size(); i++) {
+				if(!p2_corps.get(i).isActive()) {
+					corpID++;
+				}
+			}
+			return p2_corps.get(corpID);
 		}
 		return null;
 	}
@@ -394,7 +406,14 @@ public class FuzzyChess {
 
 	public void endSubturn() {
 		System.out.println("End Subturn");
-		if(++subturn == 3)
+		int maxSubTurns = 3;
+		ArrayList<Corp> currentCorps = turn == 0 ? p1_corps : p2_corps;
+		for(Corp c : currentCorps) {
+			if(!c.isActive()) {
+				maxSubTurns--;
+			}
+		}
+		if(++subturn == maxSubTurns)
 			endTurn();
 		else 
 			board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);

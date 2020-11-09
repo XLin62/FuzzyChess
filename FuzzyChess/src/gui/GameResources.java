@@ -25,6 +25,7 @@ public class GameResources{
 	private ArrayList<BufferedImage> blackChessSprites;
 	private ArrayList<BufferedImage> whiteChessSprites;
 	private ArrayList<BufferedImage> diceSprites;
+	private ArrayList<BufferedImage> rulesImages;
 	
 	private GameResources() {
 		fontStyle = new Font("TimesRoman", Font.PLAIN, 22);
@@ -40,6 +41,7 @@ public class GameResources{
 		captureSpaceColor = Color.RED;
 		
 		loadSprites();
+		loadRulesImages();
 	}
 	
 	//can add more methods for more themes ===
@@ -66,6 +68,16 @@ public class GameResources{
 						diceSprites.add(spritesheet.getSubimage(j * 45, i * 45, 45, 45));
 				}
 			}
+		} catch (IOException e) {
+			System.out.println("Error - Images failed to load");
+		}
+	}
+	
+	private void loadRulesImages() {
+		rulesImages = new ArrayList<BufferedImage>();
+		try {
+			rulesImages.add(ImageIO.read(new File("resources/movement.png")));
+			rulesImages.add(ImageIO.read(new File("resources/rolls.png")));
 		} catch (IOException e) {
 			System.out.println("Error - Images failed to load");
 		}
@@ -125,6 +137,10 @@ public class GameResources{
 
 	public ArrayList<BufferedImage> getDiceSprites() {
 		return diceSprites;
+	}
+	
+	public ArrayList<BufferedImage> getRulesImages(){
+		return rulesImages;
 	}
 	
 	public BufferedImage getChessSprite(char pieceID) {
