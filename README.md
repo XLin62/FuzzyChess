@@ -12,18 +12,10 @@ Game Logic -
   
 GUI -
  Most functions of game work now in interface
- -Needed-
-  Dice Roll/Combat Display - Minor tweaks needed - I want to have the roll animation finish before peices move
-  Menu - as of now the menu doesnt work at all - need functionality
-  End Turn Button - easy implementation - to do soon
-  Tool tips to show rolls needed to capture could be a nice little add on 
-  GameOver needs to be implemented - I've got some fireworks animations from another game i'll put into the game
-  Tweaks to the look of the GUI
+ -extra themes/more sprites for user customization could be implemented possibly
+ -animations between movements/captures like rooks firing arrows, knights charging, etc could be added
+ -need howto page
   
   
 AI - 
-I think the AI can be started on even while the GUI isn't finished - currently there is a console version of
-the game that works pretty well as a test platform but the GUI works well enough for testing too. I'll probably update it a bit too.
-
-
-If any of you guys have questions about the code please ask - and document! - dont be over the top though!
+Basic AI completed - has scoring system to evaluate best moves
