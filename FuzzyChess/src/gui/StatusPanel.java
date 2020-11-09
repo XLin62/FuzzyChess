@@ -13,7 +13,7 @@ public class StatusPanel extends JPanel {
 	private JLabel turnLabel;
 	private JLabel moveLabel;
 	private JButton endTurnButton;
-	private GameResources theme;
+	private GameResources resources;
 	//private JLabel lastMoveLabel;
 	
 	public StatusPanel() {
@@ -33,24 +33,24 @@ public class StatusPanel extends JPanel {
 	}
 	
 	public void setTheme(GameResources t) {
-		theme = t;
+		resources = t;
 		updateFont();
 		updateColors();
 	}
 	
 	private void updateFont() {
-		turnLabel.setFont(theme.getFontStyle());
-		moveLabel.setFont(theme.getFontStyle());
-		endTurnButton.setFont(theme.getFontStyle());
+		turnLabel.setFont(resources.getFontStyle());
+		moveLabel.setFont(resources.getFontStyle());
+		endTurnButton.setFont(resources.getFontStyle());
 	}
 	
 	private void updateColors() {
-		setBackground(theme.getBackgroundColor());
-		endTurnButton.setBackground(theme.getBackgroundColor());
-		endTurnButton.setForeground(theme.getForegroundColor());
-		turnLabel.setForeground(theme.getForegroundColor());
-		moveLabel.setForeground(theme.getForegroundColor());
-		setBorder(BorderFactory.createLineBorder(theme.getBoardBorderColor()));
+		setBackground(resources.getBackgroundColor());
+		endTurnButton.setBackground(resources.getBackgroundColor());
+		endTurnButton.setForeground(resources.getForegroundColor());
+		turnLabel.setForeground(resources.getForegroundColor());
+		moveLabel.setForeground(resources.getForegroundColor());
+		setBorder(BorderFactory.createLineBorder(resources.getBoardBorderColor()));
 	}
 	
 	public void setTurnText(int turn) {
@@ -60,5 +60,9 @@ public class StatusPanel extends JPanel {
 	
 	public void setMoveText(int move) {
 		moveLabel.setText(String.format("Move: %d", move+1));
+	}
+	
+	public JButton getEndTurnButton() {
+		return endTurnButton;
 	}
 }

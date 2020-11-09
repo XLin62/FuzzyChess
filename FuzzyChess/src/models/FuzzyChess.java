@@ -40,6 +40,9 @@ public class FuzzyChess {
 	private boolean diceOffset;
 	private int lastRoll;
 	private String captureResult;
+	
+	//if enabled - all rolls = 6
+	private boolean devMode;
 
 	public FuzzyChess() {
 		gameOver = false;
@@ -54,10 +57,10 @@ public class FuzzyChess {
 		selectedEnemy = null;
 		dice = new Random();
 		dice.setSeed((long)Math.random() * 100000);
+		captureResult = "";
+		devMode = false;
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 	}
-
-	
 
 	//corps grab pieces from the board
 	//this is ugly code too - but w/e
@@ -188,8 +191,6 @@ public class FuzzyChess {
 				moveMade = true;
 			}
 		}
-		/*selectedPiece = null;
-		selectedEnemy = null;*/
 		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
 		return moveMade;
 	}
@@ -197,6 +198,7 @@ public class FuzzyChess {
 	//resets the selected pieces in the game
 	//call if makeMove returns false
 	public void resetSelectedPieces() {
+		captureResult = "";
 		selectedPiece = null;
 		selectedEnemy = null;
 	}
@@ -282,6 +284,7 @@ public class FuzzyChess {
 		switch(selectedPiece.getid()) {
 		case 'n':
 		case 'N': //knight attack - melee/charge
+			capturePositions.addAll(getSurroundingEnemyPositions(selectedPiece, 1));
 			for(BoardPosition move : possibleMoves) {
 				ChessPiece current = new ChessPiece(move, selectedPiece.getid(), selectedPiece.getDirection());
 				capturePositions.addAll(getSurroundingEnemyPositions(current, 1));				
@@ -353,6 +356,9 @@ public class FuzzyChess {
 			}
 		}
 		
+		if(devMode)
+			lastRoll = 6;
+		
 		for(int x = 0; x < neededRolls.length; x++) {
 			if(neededRolls[x] == lastRoll) {
 				captureResult = "Won";
@@ -420,6 +426,14 @@ public class FuzzyChess {
 	
 	public boolean isDiceOffset() {
 		return diceOffset;
+	}
+	
+	public void toggleDevMode() {
+		devMode = !devMode;
+	}
+	
+	public boolean isDevMode() {
+		return devMode;
 	}
 	
 	public String getCaptureResult() {
