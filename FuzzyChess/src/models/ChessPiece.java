@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 public class ChessPiece {
 	private BoardPosition position;
-	private char id;
+	private boolean hasMoved;
+	private char pieceID;
 	private int direction;
+	
 	/*							king	queen	knight	bishop	rook	pawn */
 	private int[][][] rolls = {{{4,5,6},{4,5,6},{4,5,6},{4,5,6},{5,6},{1,2,3,4,5,6}}, 
 							   {{4,5,6},{4,5,6},{4,5,6},{4,5,6},{5,6},{2,3,4,5,6}},
@@ -17,14 +19,15 @@ public class ChessPiece {
 	public final static int UP = -1;
 	
 	
-	public ChessPiece(BoardPosition pos, char id, int direction) {
-		this.position = pos;
-		this.id = id;
-		this.direction = direction;
+	public ChessPiece(BoardPosition pos, char id, int dir) {
+		position = pos;
+		pieceID = id;
+		direction = dir;
+		hasMoved = false;
 	}
 	
 	private String getName() {
-		switch(id) {
+		switch(pieceID) {
 		case 'p':
 			return "Black Pawn";
 		case 'P':
@@ -55,7 +58,7 @@ public class ChessPiece {
 	}
 	
 	private int convertIDtoArrayPosition() {
-		switch(id) {
+		switch(pieceID) {
 		case 'k':
 		case 'K':
 			return 0;
@@ -81,7 +84,7 @@ public class ChessPiece {
 	}
 	
 	public char getid() {
-		return id;
+		return pieceID;
 	}
 	
 	public int getDirection() {
@@ -116,7 +119,7 @@ public class ChessPiece {
 		possibleActions.add(new BoardPosition(startX - 1, startY + direction));
 		
 		//if its a pawn - end here
-		if(id == 'p' || id == 'P') return possibleActions;
+		if(pieceID == 'p' || pieceID == 'P') return possibleActions;
 
 		//rest of piece movements
 		//backward and back diagonal
@@ -133,7 +136,7 @@ public class ChessPiece {
 	
 	//returns number of steps a piece can move
 	public int getMoveCount() {
-		switch(id) {
+		switch(pieceID) {
 			case 'p':				
 			case 'P':
 			case 'r':
@@ -154,8 +157,16 @@ public class ChessPiece {
 		}
 	}
 	
+	public void setHasMoved(boolean flag) {
+		hasMoved = flag;
+	}
+	
+	public boolean getHasMoved() {
+		return hasMoved;
+	}
+	
 	public ChessPiece copy() {
-		return new ChessPiece(new BoardPosition(position.getX(), position.getY()), id, direction);
+		return new ChessPiece(new BoardPosition(position.getX(), position.getY()), pieceID, direction);
 	}
 	
 	@Override
@@ -163,13 +174,13 @@ public class ChessPiece {
 		if(!(o instanceof ChessPiece))
 			return false;
 		ChessPiece other = (ChessPiece)o;
-		return (this.direction == other.direction && this.id == other.id && this.position.equals(other.getPosition()));
+		return (this.direction == other.direction && this.pieceID == other.pieceID && this.position.equals(other.getPosition()));
 	}
 	
 	@Override
 	public int hashCode() {
 		int result = position.hashCode();
-		result = 31 * result + Character.hashCode(id);
+		result = 31 * result + Character.hashCode(pieceID);
 		result = 31 * result + Integer.hashCode(direction);
 		return result;
 	}

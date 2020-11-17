@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -20,24 +21,38 @@ public class AttackPanel extends JPanel implements Runnable{
 	private ImagePanel defenderPanel;
 	private JLabel attackerLabel;
 	private JLabel defenderLabel;
+	private JLabel rollsNeededLabel;
 	public Thread diceRoller;
+	private String captureResult;
+	private String rollsNeeded;
 	private int lastRoll;
 	//callback to engine to update game after dice roll animation
 	private FuzzyChessEngine callback;
 	
 	public AttackPanel() {
-		setLayout(new FlowLayout());
+		setLayout(new BorderLayout());
+		JPanel p = new JPanel();
+		p.setBackground(Color.DARK_GRAY);
+		p.setLayout(new FlowLayout());
+		
+		//setLayout(new FlowLayout());
+		rollsNeededLabel = new JLabel(" ");
+		rollsNeededLabel.setHorizontalAlignment(JLabel.CENTER);
+		rollsNeededLabel.setVerticalAlignment(JLabel.CENTER);
 		attackerLabel = new JLabel("Attacker");
 		defenderLabel = new JLabel("Defender");
 		attackerPanel = new ImagePanel();
 		dicePanel = new ImagePanel();
 		defenderPanel = new ImagePanel();
 		
-		add(attackerLabel);
-		add(attackerPanel);
-		add(dicePanel);
-		add(defenderPanel);
-		add(defenderLabel);
+		p.add(attackerLabel);
+		p.add(attackerPanel);
+		p.add(dicePanel);
+		p.add(defenderPanel);
+		p.add(defenderLabel);
+		
+		add(p, BorderLayout.CENTER);
+		add(rollsNeededLabel, BorderLayout.SOUTH);
 	}
 	
 	private class ImagePanel extends JPanel{
@@ -72,17 +87,20 @@ public class AttackPanel extends JPanel implements Runnable{
 	}
 	
 	//start animation - freeze rest of gui
-	public void rollDice(int lastroll) {
-		lastRoll = lastroll;
+	public void rollDice(int lastroll, String rollsNeeded, String captureResult) {
+		this.lastRoll = lastroll;
+		this.captureResult = captureResult;
+		rollsNeededLabel.setText(rollsNeeded);
 		if(diceRoller == null) {
 			diceRoller = new Thread(this);
 			diceRoller.start();
 		}
 	}
 	
-	public void update(char attackerID, char defenderID, String attackResult) {
+	public void update(char attackerID, char defenderID) {
 		attackerPanel.setImage(resources.getChessSprite(attackerID));
 		defenderPanel.setImage(resources.getChessSprite(defenderID));
+		rollsNeededLabel.setText(" ");
 		attackerPanel.repaint();
 		defenderPanel.repaint();
 	}
@@ -90,6 +108,9 @@ public class AttackPanel extends JPanel implements Runnable{
 	public void setTheme(GameResources t) {
 		resources = t;
 		setBackground(resources.getBackgroundColor());
+		rollsNeededLabel.setBackground(resources.getBackgroundColor());
+		rollsNeededLabel.setForeground(resources.getForegroundColor());
+		rollsNeededLabel.setFont(resources.getFontStyle());
 		attackerLabel.setForeground(resources.getForegroundColor());
 		defenderLabel.setForeground(resources.getForegroundColor());
 		setBorder(BorderFactory.createLineBorder(resources.getBoardBorderColor()));
@@ -103,14 +124,20 @@ public class AttackPanel extends JPanel implements Runnable{
 
 	@Override
 	public void run() {
-		for(int i = 1; i <= 10; i++) {
-			int nextImageID = i < 10 ? (int)((Math.random() * 100) % 6) + 1 : lastRoll;
+		int frames = 15;
+		for(int i = 1; i <= frames; i++) {
+			int nextImageID = i < frames ? (int)((Math.random() * 100) % 6) + 1 : lastRoll;
 			dicePanel.setImage(resources.getDiceSprite(nextImageID));
 			dicePanel.repaint();
 			try {
 				Thread.sleep(200);
 			} catch(InterruptedException e) {}
 		}
+		try {
+			//show result for small amt of time then return control
+			rollsNeededLabel.setText(captureResult);
+			Thread.sleep(1000);
+		} catch(InterruptedException e) {}
 		diceRoller = null;
 		callback.callbackUpdate();
 	}

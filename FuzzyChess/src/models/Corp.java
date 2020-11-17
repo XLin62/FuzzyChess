@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * When King dies its game over.
  */
 
-//update getMemberAt
+//rework this class
 
 public class Corp {
 	private ArrayList<ChessPiece> members;
@@ -28,6 +28,13 @@ public class Corp {
 		isActive = true;
 	}
 	
+	private Corp(ArrayList<ChessPiece> members, ChessPiece leader, Corp kingsCorp, boolean isActive) {
+		this.members = members;
+		this.leader = leader;
+		this.kingsCorp = kingsCorp;
+		this.isActive = isActive;
+	}
+	
 	public void addMember(ChessPiece member) {
 		if(member.getid() == 'k' || member.getid() == 'K' || member.getid() == 'b' || member.getid() == 'B') {
 			leader = member;
@@ -37,22 +44,19 @@ public class Corp {
 	
 	//update to remove king corp member if captured
 	public void removeMember(ChessPiece member) {
-		//if member is a delegated member from king - remove it from kings members
-		if(kingsCorp != null && kingsCorp.getMembers().contains(member)) {
-			kingsCorp.removeMember(member);
+		if(member.getid() == leader.getid() && (kingsCorp != null)) {
+			members.remove(member);
+			transferMembers();
 		}
 		else {
 			members.remove(member);
-			//if the member is a bishop - transfer the members it commands to the king
-			if((member.getid() != 'K' && member.getid() != 'k') && member.getid() == leader.getid()) {
-				transferMembers();
-			}		
 		}
 	}
 	
 	public void removeAll() {
-		members.removeAll(members);
-		leader = null;
+		while(!members.isEmpty()) {
+			members.remove(0);
+		}
 	}
 	
 	//maybe redo - idk if we'll need a reference to the leader later
@@ -60,29 +64,66 @@ public class Corp {
 		return leader;
 	}
 	
-	//redo - currently returns reference to all members
-	public ArrayList<ChessPiece> getMembers() {
+	//returns a reference to the corp specific members
+	//used to 
+	public void unfreezePieces(){
+		for(ChessPiece c : members) {
+			c.setHasMoved(false);
+		}
+	}
+	
+	/* get all active pieces of current corp
+	 * active pieces are ones that haven't moved
+	 * and are delegated from the kings corp */
+	public ArrayList<ChessPiece> getActiveMembers() {
 		ArrayList<ChessPiece> totalMembers = new ArrayList<ChessPiece>();
-		totalMembers.addAll(members);
+		//if not active then dont add delegated members
+		if(isActive == false) {
+			return members;
+		}
+		for(int i = 0; i < members.size(); i++) {
+			if(!members.get(i).getHasMoved()) {
+				totalMembers.add(members.get(i));
+			}
+		}
 		//if null then this is the kings corp
 		//otherwise king delegates all members besides himself to bishops
 		if(kingsCorp != null) {
-			totalMembers.addAll(kingsCorp.getMembers());
+			totalMembers.addAll(kingsCorp.getActiveMembers());
 			totalMembers.remove(kingsCorp.getLeader());
 		}
 		return totalMembers;			
 	}
 	
-	public ArrayList<BoardPosition> getMemberPositions(){
+	//used for board display (boardcolors) 
+	public ArrayList<BoardPosition> getActiveMemberPositions(){
 		ArrayList<BoardPosition> memberPositions = new ArrayList<BoardPosition>();
-		for(ChessPiece member : getMembers()) {
+		for(ChessPiece member : getActiveMembers()) {
 			memberPositions.add(member.getPosition());
 		}
 		return memberPositions;
 	}
+	
+	
+	//searches through personal and delegated members to
+	//find a member that is at position p
+	//use if selecting a friendly peice
+	public ChessPiece getActiveMemberAt(BoardPosition p) {
+		if(isActive) {
+			for(ChessPiece member : getActiveMembers()) {
+				if(member.getPosition().equals(p)) {
+					return member;
+				}
+			}
+		}
+		return null;
+	}
 
+	//searches through personal members only to find
+	//a member that is at position p - use if selecting
+	//an enemy
 	public ChessPiece getMemberAt(BoardPosition p) {
-		for(ChessPiece member : getMembers()) {
+		for(ChessPiece member : members) {
 			if(member.getPosition().equals(p)) {
 				return member;
 			}
@@ -90,16 +131,41 @@ public class Corp {
 		return null;
 	}
 	
-	//in case leader dies
+	//in case leader of bishop controlled forces dies
+	//transfer all members back to king
 	private void transferMembers() {
 		for(int i = 0; i < members.size(); i++) {
 			kingsCorp.addMember(members.get(i));
-			members.remove(members.get(i));
 		}
+		removeAll();
 		isActive = false;
 	}
 	
 	public boolean isActive() {
 		return isActive;
+	}
+	
+	public Corp copy() {
+		ArrayList<ChessPiece> copiedMembers = new ArrayList<ChessPiece>();
+		for(int i = 0; i < members.size(); i++) {
+			copiedMembers.add(members.get(i).copy());
+		}
+		ChessPiece copiedLeader = leader.copy();
+		Corp copiedKingsCorp;
+		if(kingsCorp != null)
+			copiedKingsCorp = kingsCorp.copy();
+		else
+			copiedKingsCorp = kingsCorp;
+		return new Corp(copiedMembers, copiedLeader, copiedKingsCorp, isActive);		
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for(ChessPiece c : getActiveMembers()) {
+			sb.append(c.getid() + " ");
+		}
+		sb.append("]");
+		return sb.toString();		
 	}
 }

@@ -1,9 +1,7 @@
 package engine;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
-import ai.SimpleChessAgent;
 import gui.FuzzyChessConsoleDisplay;
 import models.BoardPosition;
 import models.FuzzyChess;
@@ -12,7 +10,6 @@ import models.FuzzyChess;
 public class FuzzyChessConsoleEngine {
 	private Scanner inputScanner;
 	private FuzzyChess game;
-	private SimpleChessAgent ai;
 	
 	public FuzzyChessConsoleEngine() {
 		inputScanner = new Scanner(System.in);

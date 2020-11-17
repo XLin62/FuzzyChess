@@ -1,7 +1,10 @@
 package models;
 
+//need to copy reference of game for ai
+//need to fix corps to transfer members to king correctly *******
+//need to fix delegation property and make sure pieces know they can only move
+//one time per subturn
 
-//NEED TO LOSE REFERENCE TO SELECTED PEICE AND ENEMY PEICE - GUI BREAKS
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +32,7 @@ public class FuzzyChess {
 	private int turn;
 	private int subturn;
 	private boolean gameOver;
+	private int maxSubTurns;
 
 	private ChessPiece selectedPiece;
 	private ChessPiece selectedEnemy;
@@ -53,13 +57,35 @@ public class FuzzyChess {
 		p2_captures = new ArrayList<ChessPiece>();
 		turn = 0;
 		subturn = 0;
+		maxSubTurns = 3;
 		selectedPiece = null;
 		selectedEnemy = null;
 		dice = new Random();
 		dice.setSeed((long)Math.random() * 100000);
 		captureResult = "";
 		devMode = false;
-		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
+		board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), null, null);
+	}
+	
+	//for copying
+	private FuzzyChess(ArrayList<Corp> copiedP1Corps, ArrayList<Corp> copiedP2Corps, GameBoard copiedBoard, int t) {
+		gameOver = false;
+		board = copiedBoard;
+		p1_corps = copiedP1Corps;
+		p2_corps = copiedP2Corps;
+		currentEnemyCorp = null;
+		p1_captures = new ArrayList<ChessPiece>();
+		p2_captures = new ArrayList<ChessPiece>();
+		turn = t;
+		subturn = 0;
+		maxSubTurns = 3;
+		selectedPiece = null;
+		selectedEnemy = null;
+		dice = new Random();
+		dice.setSeed((long)Math.random() * 100000);
+		captureResult = "";
+		devMode = false;
+		board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), null, null);
 	}
 
 	//corps grab pieces from the board
@@ -135,21 +161,10 @@ public class FuzzyChess {
 	 * logic bug - supposed to lose turn if corp leader is captured
 	 * king - lbishop - rbishop */
 	public Corp getCurrentCorp() {
-		int corpID = subturn;
-		if (turn == 0) {
-			for(int i = 0; i < p1_corps.size(); i++) {
-				if(!p1_corps.get(i).isActive()) {
-					corpID++;
-				}
-			}
-			return p1_corps.get(corpID);
-		} else if (turn == 1) {
-			for(int i = 0; i < p2_corps.size(); i++) {
-				if(!p2_corps.get(i).isActive()) {
-					corpID++;
-				}
-			}
-			return p2_corps.get(corpID);
+		ArrayList<Corp> corps = turn == 0 ? p1_corps : p2_corps;
+		for(int i = subturn; i < 3; i++) {
+			if(corps.get(i).isActive())
+				return corps.get(i);
 		}
 		return null;
 	}
@@ -159,11 +174,11 @@ public class FuzzyChess {
 	* are obtained for later when making a move*/
 	public boolean selectPiece(BoardPosition selectedPosition) {
 		if(board.isInBounds(selectedPosition)) {
-			selectedPiece = getCurrentCorp().getMemberAt(selectedPosition);			
+			selectedPiece = getCurrentCorp().getActiveMemberAt(selectedPosition);			
 			if(selectedPiece != null) {
 				possibleMoves = getMovementPositions();
 				possibleCaptures = getCapturePositions();
-				board.updateBoardColors(getCurrentCorp().getMemberPositions(), possibleMoves, possibleCaptures);
+				board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), possibleMoves, possibleCaptures);
 				return true;
 			}
 		}
@@ -174,11 +189,8 @@ public class FuzzyChess {
 	/*gain reference to selectedEnemy and its corp so we can remove it if
 	 * successful roll for capture -- maybe get rid of --*/
 	private boolean selectEnemyPiece(BoardPosition selectedPosition) {
-		ArrayList<Corp> enemyCorps = turn == 0 ? p2_corps : p1_corps;
-		
+		ArrayList<Corp> enemyCorps = turn == 0 ? p2_corps : p1_corps;		
 		for(Corp enemyCorp : enemyCorps) {
-			//if corp is not active then its remaining pieces are in the kings corp..
-			if(!enemyCorp.isActive()) continue;
 			currentEnemyCorp = enemyCorp;
 			selectedEnemy = enemyCorp.getMemberAt(selectedPosition);
 			if(selectedEnemy != null) return true;
@@ -203,7 +215,8 @@ public class FuzzyChess {
 				moveMade = true;
 			}
 		}
-		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
+		board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), null, null);
+		selectedPiece.setHasMoved(moveMade);
 		return moveMade;
 	}
 	
@@ -373,8 +386,10 @@ public class FuzzyChess {
 		
 		for(int x = 0; x < neededRolls.length; x++) {
 			if(neededRolls[x] == lastRoll) {
-				captureResult = "Won";
+				captureResult = "Capture Success!";
+				System.out.println("before capture" + currentEnemyCorp.toString());
 				currentEnemyCorp.removeMember(selectedEnemy);
+				System.out.println("after capture" + currentEnemyCorp.toString()); //should be empty
 				if(turn == 0)
 					p1_captures.add(selectedEnemy);
 				else 
@@ -385,7 +400,7 @@ public class FuzzyChess {
 				return true;
 			}				
 		}
-		captureResult = "Lost";
+		captureResult = "Capture Failed...";
 		return false;
 	}
 	
@@ -399,24 +414,33 @@ public class FuzzyChess {
 
 	public void endTurn() {
 		turn = ++turn % 2;
-		subturn = 0;		
-		board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
-		System.out.println("--End Turn");
+		subturn = 0;
+		//reset current corps pieces so they can move again
+		ArrayList<Corp> currentCorps = turn == 0 ? p1_corps : p2_corps;
+		for(Corp c : currentCorps) {
+			c.unfreezePieces();
+		}
+		board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), null, null);
 	}
 
 	public void endSubturn() {
-		System.out.println("End Subturn");
-		int maxSubTurns = 3;
+		maxSubTurns = 3;
 		ArrayList<Corp> currentCorps = turn == 0 ? p1_corps : p2_corps;
 		for(Corp c : currentCorps) {
-			if(!c.isActive()) {
+			if(!c.isActive())
 				maxSubTurns--;
-			}
 		}
-		if(++subturn == maxSubTurns)
-			endTurn();
-		else 
-			board.updateBoardColors(getCurrentCorp().getMemberPositions(), null, null);
+		if(subturn++ < maxSubTurns-1) {
+			board.updateBoardColors(getCurrentCorp().getActiveMemberPositions(), null, null);
+		}
+		else{
+			board.updateBoardColors(null, null, null);
+		}
+		
+	}
+	
+	public int getMaxSubTurns() {
+		return maxSubTurns;
 	}
 	
 	public ChessPiece getSelectedPiece() {
@@ -425,6 +449,23 @@ public class FuzzyChess {
 	
 	public ChessPiece getSelectedEnemyPiece() {
 		return selectedEnemy;
+	}
+	
+	public ArrayList<BoardPosition> getPossibleMoves(){
+		return possibleMoves;
+	}
+	
+	public ArrayList<BoardPosition> getPossibleCaptures(){
+		return possibleCaptures;
+	}
+	
+	public ArrayList<BoardPosition> getAllMoves(){
+		ArrayList<BoardPosition> allMoves = new ArrayList<BoardPosition>();
+		if(selectedPiece != null) {
+			allMoves.addAll(possibleMoves);
+			allMoves.addAll(possibleCaptures);
+		}
+		return allMoves;
 	}
 
 	public GameBoard getBoard() {
@@ -465,5 +506,19 @@ public class FuzzyChess {
 
 	public ArrayList<ChessPiece> getPlayer2Captures() {
 		return p2_captures;
+	}
+	
+	//for ai environment visualization
+	//really just need the corps which keeps track
+	//of commanding forces, the gameboard, and the current turn
+	public FuzzyChess copy() {
+		ArrayList<Corp> copied_p1Corps = new ArrayList<Corp>();
+		ArrayList<Corp> copied_p2Corps = new ArrayList<Corp>();
+		for(int i = 0; i < p1_corps.size(); i++) {
+			copied_p1Corps.add(p1_corps.get(i).copy());
+			copied_p2Corps.add(p2_corps.get(i).copy());
+		}
+		GameBoard copiedBoard = board.copy();
+		return new FuzzyChess(copied_p1Corps, copied_p2Corps, copiedBoard, turn);
 	}
 }

@@ -7,9 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -17,39 +14,32 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 
-public class FireworksPanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
+public class FireworksPanel extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1266778429484392409L;
-
     private LinkedList<Spark> sparks = new LinkedList<Spark>();
-
     private final Dimension MAX_DIMENSION = new Dimension(800, 800);
-
     private Random generator = new Random();
     
     private Timer explosionTimer;
+    private Timer fireworksTimer;
 
     public FireworksPanel() {
-        super();
-
         this.setPreferredSize(MAX_DIMENSION);
-        this.setMinimumSize(MAX_DIMENSION);
-        this.setMaximumSize(MAX_DIMENSION);
-
         this.setLayout(null);
 
         //for the actual explosions
-        new Timer(33, new ActionListener() {
-            //Fireworks f = new Fireworks();
-
-            public void actionPerformed(ActionEvent e) {
-                if (sparksLeft() > 0) {
-                    repaint();
-                }
-            }
-        }).start();
-        
-        explosionTimer = new Timer(1000,this);
+        fireworksTimer = new Timer(15, this);
+        explosionTimer = new Timer(1000, this);      
+    }
+    
+    public void startFireworks() {
+    	fireworksTimer.start();
         explosionTimer.start();
+    }
+    
+    public void stopFireworks() {
+    	fireworksTimer.stop();
+    	explosionTimer.stop();
     }
 
     public int sparksLeft() {
@@ -86,19 +76,17 @@ public class FireworksPanel extends JPanel implements MouseListener, MouseMotion
 
         int choice = generator.nextInt(100);
 
-        if (choice < 18) {
+        if (choice < 20) {
             createCircleSpark(x, y, sparkCount, c, lifespan);
-        } else if (choice < 36) {
+        } else if (choice < 40) {
             createPerfectCircleSpark(x, y, sparkCount, c, lifespan);
-        } else if (choice < 54) {
+        } else if (choice < 60) {
             createMovingSpark(x, y, sparkCount, c, lifespan);
-        } else if (choice < 72) {
+        } else if (choice < 80) {
             createBubbleSpark(x, y, sparkCount, c, lifespan);
-        } else if (choice < 85) {
+        } else {
             createTrigSpark(x, y, sparkCount, c, lifespan);
-        } /*else {
-            createGiantSpark(x, y, sparkCount, c, lifespan);
-        }*/
+        }
     }
 
     private void createCircleSpark(int x, int y, int sparkCount, Color c, long lifespan) {
@@ -119,14 +107,6 @@ public class FireworksPanel extends JPanel implements MouseListener, MouseMotion
         for (int i = 0; i < sparkCount; i++) {
             double direction = 360 * generator.nextDouble();
             sparks.addLast(new PerfectCircleSpark(this, direction, x, y, c, lifespan, speed));
-        }
-    }
-
-    private void createGiantSpark(int x, int y, int sparkCount, Color c, long lifespan) {
-        for (int i = 0; i < sparkCount; i++) {
-            double direction = 360 * generator.nextDouble();
-            double speed = 10 * generator.nextDouble() + 5;
-            sparks.addLast(new GiantSpark(this, direction, x, y, c, lifespan, speed));
         }
     }
 
@@ -154,30 +134,15 @@ public class FireworksPanel extends JPanel implements MouseListener, MouseMotion
         }
     }
 
-    //add a mouselistener if you wanna click for explosions
-    public void mouseClicked(MouseEvent e) {
-        explode(e.getX(), e.getY());
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-    @Override
-    public void mouseExited(MouseEvent e) {}
-    @Override
-    public void mousePressed(MouseEvent e) {}
-    @Override
-    public void mouseReleased(MouseEvent e) {}
-
-    @Override
-    public void mouseDragged(MouseEvent e) {}
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        //System.out.println("POO");
-    }
-
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		explode(generator.nextInt(400)+200, generator.nextInt(400)+200);
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == fireworksTimer) {
+			if(sparksLeft() > 0) {
+                repaint();
+			}
+		}
+		else if(e.getSource() == explosionTimer) {
+			explode(generator.nextInt(400)+200, generator.nextInt(400)+200);
+		}
 	}
 }

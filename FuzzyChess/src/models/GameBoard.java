@@ -77,10 +77,6 @@ public class GameBoard{
 		}
 	}
 	
-	public void setBoardColors(char[][] newBoardColors) {
-		
-	}
-	
 	public char[][] getBoardState() {
 		return boardState;
 	}

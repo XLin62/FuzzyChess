@@ -40,6 +40,7 @@ public class FuzzyChessDisplay {
 		display.getContentPane().add(capturePanel2, BorderLayout.EAST);
 		display.getContentPane().add(gamePanel, BorderLayout.CENTER);
 		display.getContentPane().add(attackPanel, BorderLayout.NORTH);
+		display.validate();
 		display.pack();
 		
 		setTheme("Default");
@@ -79,23 +80,29 @@ public class FuzzyChessDisplay {
 	public void displayWinScreen() {
 		if(gamePanel != null) {
 			display.getContentPane().remove(gamePanel);
+			display.revalidate();
 			winScreen = new FireworksPanel();
 			display.add(winScreen, BorderLayout.CENTER);
 			display.validate();
+			winScreen.startFireworks();
 			statusPanel.getEndTurnButton().setEnabled(false);
 		}
 	}
 	
 	public void reset() {
 		if(winScreen != null) {
+			winScreen.stopFireworks();
 			display.getContentPane().remove(winScreen);
+			display.revalidate();
 			winScreen = null;
 		}
 		if(helpScreen != null) {
 			display.getContentPane().remove(helpScreen);
+			display.revalidate();
 			helpScreen = null;
 		}
 		display.getContentPane().add(gamePanel);
+		display.validate();
 		statusPanel.getEndTurnButton().setEnabled(true);
 	}
 	

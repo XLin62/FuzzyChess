@@ -14,13 +14,11 @@ public class StatusPanel extends JPanel {
 	private JLabel moveLabel;
 	private JButton endTurnButton;
 	private GameResources resources;
-	//private JLabel lastMoveLabel;
 	
 	public StatusPanel() {
 		turnLabel = new JLabel("White's Turn");
 		moveLabel = new JLabel("Move: 1");
 		endTurnButton = new JButton("End Turn");
-		//lastMoveLabel = new JLabel("LastMove"); //idk yet
 		
 		setLayout(new FlowLayout());
 		add(turnLabel);
@@ -58,8 +56,15 @@ public class StatusPanel extends JPanel {
 		turnLabel.setText(turnText);
 	}
 	
-	public void setMoveText(int move) {
-		moveLabel.setText(String.format("Move: %d", move+1));
+	public void setMoveText(String move) {
+		moveLabel.setText(String.format("Move: %s", move));
+	}
+	
+	public void setButtonHighlight(boolean enabled) {
+		if(enabled) {
+			endTurnButton.requestFocusInWindow();
+		} else {
+		}
 	}
 	
 	public JButton getEndTurnButton() {
