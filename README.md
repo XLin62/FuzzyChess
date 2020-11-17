@@ -2,23 +2,22 @@
 Senior Capstone Project for Kennesaw State University
 
 
-TODO: (as of 11/9/20)
+TODO: (as of 11/17/2020)
 
-As of now - GUI is mostly complete and AI is needed to be worked on
+As of now - GUI is 95% complete and AI is needed to be worked on
 
 Game Logic - 
- All logic is now sound - only updates to models package now is just some really minor tweaks to updating
- the board colors - other than that everything is in place completely to start GUI/AI
- -bugs: Currently capturing a leader for some reason when transferring members to kings corp removes king from its own corp
-        subturns working fine now however.
+As far as I know - everything works and there are no bugs
   
 GUI -
- Most functions of game work now in interface
- -extra themes/more sprites for user customization could be implemented possibly
- -animations between movements/captures like rooks firing arrows, knights charging, etc could be added
- -need howto page
+Still need to update rules page and add more themes to game
+AI timer runs smoothly and not too fast and waits for roll
+animation to continue its move list(I personally think)
+Possibly add a pvp option/or an ai vs ai option
+Animations for attacks are still a possibility
   
   
 AI - 
-Basic AI completed - has scoring system to evaluate best moves
-Found in AI testing fork
+Basic AI completed - just picks random members from those available
+to it and then picks a random location from the generated moves/captures
+Need to further add complexity to the ai
