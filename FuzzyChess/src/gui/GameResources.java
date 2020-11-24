@@ -57,7 +57,7 @@ public class GameResources{
 		blackChessSprites = new ArrayList<BufferedImage>();
 		diceSprites = new ArrayList<BufferedImage>();
 		try {
-			spritesheet = ImageIO.read(new File("resources/Chess.png"));
+			spritesheet = ImageIO.read(new File("FuzzyChess/resources/Chess.png"));
 			for(int i = 0; i < 3; i++) {
 				for(int j = 0; j < 6; j++) {
 					if(i == 0)
@@ -76,8 +76,8 @@ public class GameResources{
 	private void loadRulesImages() {
 		rulesImages = new ArrayList<BufferedImage>();
 		try {
-			rulesImages.add(ImageIO.read(new File("resources/movement.png")));
-			rulesImages.add(ImageIO.read(new File("resources/rolls.png")));
+			rulesImages.add(ImageIO.read(new File("FuzzyChess/resources/movement.png")));
+			rulesImages.add(ImageIO.read(new File("FuzzyChess/resources/rolls.png")));
 		} catch (IOException e) {
 			System.out.println("Error - Images failed to load");
 		}
